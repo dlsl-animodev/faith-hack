@@ -49,13 +49,13 @@ export default function SubmissionCard({ submission }: SubmissionCardProps) {
           </Badge>
           <span className="text-zinc-500 text-xs">{formatTimestamp(created_at)}</span>
         </div>
-        <span className="text-zinc-600 text-xs font-mono truncate max-w-[140px]">
+        <span className="text-zinc-600 text-xs font-mono truncate max-w-35">
           ref: {reference_id.slice(0, 8)}
         </span>
       </CardHeader>
 
       <CardContent className="text-green-300 text-sm leading-relaxed">
-        <p className="whitespace-pre-wrap break-words">
+        <p className="whitespace-pre-wrap wrap-break-words">
           {expanded ? content : preview}
         </p>
         <p className="text-zinc-600 text-xs mt-2">
