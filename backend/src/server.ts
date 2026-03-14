@@ -8,14 +8,22 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+const allowedOrigins = [FRONTEND_URL, 'http://localhost:3000'].filter(Boolean);
 
 // ─── Middleware ─────────────────────────────────────────────────────────────
 
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: (requestOrigin, callback) => {
+      if (!requestOrigin || allowedOrigins.includes(requestOrigin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 
