@@ -1,0 +1,11 @@
+# ignore backend and local files
+/backend
+tmp
+*.log
+.DS_Store
+node_modules
+**/node_modules
+*.env*
+**/__tests__
+**/*.test.*
+**/*.spec.*
