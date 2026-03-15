@@ -2,15 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  output: 'standalone',
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'mctbwzqfdlvabghqcnlu.supabase.co',
-      },
-    ],
-  },
+  // 'output: standalone' removed — not needed for Vercel deployment
 };
 
 export default nextConfig;

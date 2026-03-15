@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Submission } from '@/lib/api';
+import type { Submission } from '@/lib/types';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface SubmissionCardProps {
   submission: Submission;
 }
 
-/** Formats an ISO timestamp to a human-readable local date/time string. */
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function formatTimestamp(iso: string): string {
   return new Date(iso).toLocaleString('en-US', {
     month: 'short',
@@ -20,6 +23,8 @@ function formatTimestamp(iso: string): string {
   });
 }
 
+// ─── Component ───────────────────────────────────────────────────────────────
+
 /**
  * Expandable submission card for the admin dashboard.
  * Shows type badge, timestamp, truncated preview, and full content on expand.
@@ -27,7 +32,7 @@ function formatTimestamp(iso: string): string {
 export default function SubmissionCard({ submission }: SubmissionCardProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const { type, content, created_at, reference_id } = submission;
+  const { id, type, content, created_at } = submission;
   const preview = content.length > 120 ? content.slice(0, 120) + '…' : content;
 
   return (
@@ -42,7 +47,7 @@ export default function SubmissionCard({ submission }: SubmissionCardProps) {
             className={
               type === 'bug'
                 ? 'border-red-500 text-red-400'
-                : 'border-blue-500 text-blue-400'
+                : 'border-green-500 text-green-400'
             }
           >
             {type === 'bug' ? '🐛 Bug' : '🔍 Debug'}
@@ -50,12 +55,12 @@ export default function SubmissionCard({ submission }: SubmissionCardProps) {
           <span className="text-zinc-500 text-xs">{formatTimestamp(created_at)}</span>
         </div>
         <span className="text-zinc-600 text-xs font-mono truncate max-w-35">
-          ref: {reference_id.slice(0, 8)}
+          ref: {id.slice(0, 8)}
         </span>
       </CardHeader>
 
       <CardContent className="text-green-300 text-sm leading-relaxed">
-        <p className="whitespace-pre-wrap wrap-break-words">
+        <p className="whitespace-pre-wrap break-words">
           {expanded ? content : preview}
         </p>
         <p className="text-zinc-600 text-xs mt-2">
