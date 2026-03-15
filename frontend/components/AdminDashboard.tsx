@@ -64,11 +64,8 @@ export default function AdminDashboard({
           <span className="text-3xl font-bold text-green-400">
             📋 {count} submission{count !== 1 ? 's' : ''}
           </span>
-          <span className="text-zinc-600 text-xs">(realtime)</span>
         </div>
-        <div className="pl-4 text-xs text-zinc-500">
-          ● Realtime active — new submissions appear automatically
-        </div>
+
       </div>
 
       {/* Empty state */}
