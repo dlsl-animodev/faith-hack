@@ -9,7 +9,7 @@
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui |
-| Backend | Node.js, Express, TypeScript |
+| Backend | Supabase + Next.js server actions (no separate Express API) |
 | Database | Supabase (PostgreSQL + Realtime) |
 
 ---
@@ -23,19 +23,17 @@ faith-hack/
 │   │   ├── home/      ← CLI-style submission form
 │   │   └── admin/     ← Realtime admin dashboard
 │   ├── components/
+│   │   ├── AdminDashboard.tsx
 │   │   ├── CliPrompt.tsx
-│   │   ├── TypewriterText.tsx
-│   │   └── SubmissionCard.tsx
+│   │   ├── CliTerminal.tsx
+│   │   ├── StackedSubmissions.tsx
+│   │   └── TypewriterText.tsx
+│   ├── actions/
+│   │   └── submissions.ts
 │   └── lib/
-│       ├── api.ts     ← Typed fetch helpers
-│       └── supabaseClient.ts
-├── backend/           ← Express API (port 3001)
-│   └── src/
-│       ├── server.ts
-│       ├── routes/submissions.ts
-│       ├── controllers/submissionsController.ts
-│       └── supabase/client.ts
-└── package.json       ← Monorepo root
+│       ├── supabase/client.ts
+│       └── supabase/server.ts
+└── package.json       ← Monorepo root (frontend-only if backend folder is missing)
 ```
 
 ---
@@ -49,7 +47,6 @@ create table if not exists public.submissions (
   id           uuid primary key default gen_random_uuid(),
   type         text not null check (type in ('bug', 'debug')),
   content      text not null,
-  reference_id uuid not null,
   created_at   timestamptz not null default now()
 );
 
@@ -61,61 +58,45 @@ create policy "Allow anon select" on public.submissions
 
 ### 2. Configure environment variables
 
-**`backend/.env`**
-```env
-SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_SERVICE_KEY=your-service-role-key
-PORT=3001
-FRONTEND_URL=http://localhost:3000
-```
-
 **`frontend/.env.local`**
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_KEY=your-service-role-key
+ADMIN_PASSWORD=faith
 ```
 
 > **Where to find your keys:**  
 > Supabase Dashboard → Project Settings → API  
-> - `service_role` key → `SUPABASE_SERVICE_KEY` (backend only, never expose)  
+- `service_role` key → `SUPABASE_SERVICE_KEY` (server-side only, never expose)  
 > - `anon` / `public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY` (frontend Realtime only)
 
 ### 3. Install dependencies
 
 ```bash
 npm install
+cd frontend
+npm install
 ```
 
 ### 4. Run in development
 
 ```bash
+cd frontend
 npm run dev
 ```
 
-This starts both servers concurrently:
+This starts the frontend app:
 - **Frontend**: http://localhost:3000/home
-- **Backend**: http://localhost:3001/health
 
 ---
 
-## API Endpoints
+## Supabase data model
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/submissions` | Submit an array of entries |
-| `GET` | `/api/submissions` | Fetch all submissions (newest first) |
-| `GET` | `/api/submissions/count` | Fetch total submission count |
-
-**Example POST body:**
-```json
-{
-  "entries": [
-    { "type": "bug", "content": "Button does not submit on mobile." },
-    { "type": "debug", "content": "Traced issue to missing onClick handler." }
-  ]
-}
-```
+The frontend uses server actions to write/read Supabase directly from `frontend/actions/submissions.ts`:
+- `submitEntries(entries: NewEntry[])` inserts to `submissions`
+- `getSubmissions()` selects all rows ordered newest first
+- `getSubmissionCount()` returns table count
 
 ---
 
@@ -124,4 +105,9 @@ This starts both servers concurrently:
 | Route | Description |
 |---|---|
 | `/home` | CLI-style multi-step submission form |
-| `/admin` | Realtime admin dashboard (open, no auth) |
+| `/admin` | Realtime admin dashboard (password-gated; updated CLI viewport height for 6 submissions) |
+
+### Admin notes
+- Access with `ADMIN_PASSWORD` in `frontend/.env.local` (default `faith`).
+- The CLI-themed admin terminal now has an increased min-height so 6 submissions fit comfortably on screen.
+
