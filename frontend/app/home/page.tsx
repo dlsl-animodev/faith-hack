@@ -111,17 +111,15 @@ export default function HomePage() {
           {/* ── Explain panel (visible on explain/choose/input) ─────────── */}
           {(step === 'explain' || step === 'choose' || step === 'input') && (
             <div className="space-y-1 border-l-2 border-zinc-700 pl-4 ml-1">
-              <p className="text-amber-400 font-bold">Bug vs Debug: What&apos;s the difference?</p>
+              <p className="text-amber-400 font-bold">Bug vs Debug: What would you like to offer in prayer?</p>
               <CliPrompt prefix="  [1]">
                 <span className="text-zinc-300">
-                  <span className="text-red-400 font-semibold">Bug</span> — An unexpected
-                  error or unintended behavior in the code.
+                  <span className="text-red-400 font-semibold">Bug</span> — A struggle, worry, problem, or burden in your life that you want to lift up.
                 </span>
               </CliPrompt>
               <CliPrompt prefix="  [2]">
                 <span className="text-zinc-300">
-                  <span className="text-green-400 font-semibold">Debug</span> — The process of
-                  finding and resolving those bugs.
+                  <span className="text-green-400 font-semibold">Debug</span> — A blessing, answered prayer, breakthrough, or something you are thankful for.
                 </span>
               </CliPrompt>
             </div>
