@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
-import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  weight: ['400', '500', '700'],
-});
+import MatrixBackground from '@/components/MatrixBackground';
 
 export const metadata: Metadata = {
   title: 'Faith: Hack',
@@ -19,11 +13,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${jetbrainsMono.variable} font-mono bg-zinc-950 text-green-400 antialiased min-h-screen`}
-      >
-        {children}
+    <html lang="en" className="dark font-mono">
+      <body className="bg-zinc-950 text-green-400 antialiased min-h-screen">
+        {/* Matrix rain background — sits at z-index 0, never blocks clicks */}
+        <MatrixBackground />
+        {/* All page content sits above the canvas */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          {children}
+        </div>
       </body>
     </html>
   );
