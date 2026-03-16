@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import type { Submission } from '@/lib/types';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import SubmissionCard from '@/components/SubmissionCard';
+import StackedSubmissions from '@/components/StackedSubmissions';
 import CliPrompt from '@/components/CliPrompt';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -16,40 +14,13 @@ interface AdminDashboardProps {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 /**
- * Client component that renders the admin dashboard with live Realtime updates.
- * Receives SSR-seeded data as props and subscribes to new INSERTs via Supabase.
+ * Admin dashboard shell.
+ * Realtime subscription and stack state are managed inside StackedSubmissions.
  */
 export default function AdminDashboard({
   initialSubmissions,
   initialCount,
 }: AdminDashboardProps) {
-  const [submissions, setSubmissions] = useState<Submission[]>(initialSubmissions);
-  const [count, setCount] = useState<number>(initialCount);
-
-  // ── Realtime Subscription ────────────────────────────────────────────────
-
-  useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-
-    const channel = supabase
-      .channel('submissions-feed')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'submissions' },
-        (payload) => {
-          setSubmissions((prev) => [payload.new as Submission, ...prev]);
-          setCount((prev) => prev + 1);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  // ── Render ───────────────────────────────────────────────────────────────
-
   return (
     <div className="space-y-6">
 
@@ -62,26 +33,18 @@ export default function AdminDashboard({
         </CliPrompt>
         <div className="flex items-baseline gap-3 pl-4">
           <span className="text-3xl font-bold text-green-400">
-            📋 {count} submission{count !== 1 ? 's' : ''}
+            📋 {initialCount} submission{initialCount !== 1 ? 's' : ''}
           </span>
         </div>
-
       </div>
 
-      {/* Empty state */}
-      {count === 0 && (
+      {/* Stacked submission cards */}
+      {initialSubmissions.length === 0 ? (
         <CliPrompt prefix=">">
           <span className="text-zinc-500">No submissions yet.</span>
         </CliPrompt>
-      )}
-
-      {/* Submission list */}
-      {submissions.length > 0 && (
-        <div className="space-y-3">
-          {submissions.map((sub) => (
-            <SubmissionCard key={sub.id} submission={sub} />
-          ))}
-        </div>
+      ) : (
+        <StackedSubmissions initialSubmissions={initialSubmissions} />
       )}
 
       {/* Footer */}
