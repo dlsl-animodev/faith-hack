@@ -1,23 +1,47 @@
-import { getSubmissions, getSubmissionCount } from '@/actions/submissions';
+'use client';
+
+import { useState, useEffect } from 'react';
+import AdminPasswordGate from '@/components/AdminPasswordGate';
 import AdminDashboard from '@/components/AdminDashboard';
 import CliTerminal from '@/components/CliTerminal';
+import type { Submission } from '@/lib/types';
+import { getSubmissions, getSubmissionCount } from '@/actions/submissions';
 
-// Force dynamic rendering — Supabase calls happen at request time, not build time.
-export const dynamic = 'force-dynamic';
+// ─── Component ───────────────────────────────────────────────────────────────
 
 /**
- * Server Component — fetches initial data at request time (no loading spinner).
- * Passes SSR-seeded data to the AdminDashboard client component for Realtime.
+ * Admin page — protected by a fullscreen password gate.
+ * Converts to client component so useState can guard the dashboard.
+ * Data is fetched client-side after unlock to avoid sending it before auth.
  */
-export default async function AdminPage() {
-  const [submissions, count] = await Promise.all([
-    getSubmissions(),
-    getSubmissionCount(),
-  ]);
+export default function AdminPage() {
+  const [unlocked, setUnlocked] = useState(false);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [count, setCount] = useState(0);
+
+  // Fetch data only after the gate is unlocked
+  useEffect(() => {
+    if (!unlocked) return;
+
+    async function load() {
+      const [subs, cnt] = await Promise.all([
+        getSubmissions(),
+        getSubmissionCount(),
+      ]);
+      setSubmissions(subs);
+      setCount(cnt);
+    }
+
+    load();
+  }, [unlocked]);
+
+  if (!unlocked) {
+    return <AdminPasswordGate onUnlock={() => setUnlocked(true)} />;
+  }
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
+    <main className="min-h-screen p-6 md:p-10">
+      <div className="max-w-4xl mx-auto">
         <CliTerminal title="faith-hack — admin">
           <AdminDashboard
             initialSubmissions={submissions}
