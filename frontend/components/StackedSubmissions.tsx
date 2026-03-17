@@ -45,12 +45,6 @@ export default function StackedSubmissions({ initialSubmissions }: StackedSubmis
     toastTimer.current = setTimeout(() => setToast(''), 3000);
   }
 
-  function handleNext() {
-    if (!expanded) return;
-    setStack((prev) => prev.filter((_, i) => i !== expanded.index));
-    setExpanded(null);
-  }
-
   if (stack.length === 0) {
     return <p className="text-zinc-500 text-sm font-mono">&gt; Stack cleared. No more submissions.</p>;
   }
@@ -158,12 +152,6 @@ export default function StackedSubmissions({ initialSubmissions }: StackedSubmis
                 className="px-4 py-1.5 border border-zinc-600 text-zinc-400 text-xs hover:bg-zinc-800 rounded transition-colors font-mono"
               >
                 &gt; [CLOSE]
-              </button>
-              <button
-                onClick={handleNext}
-                className="px-4 py-1.5 border border-green-700 text-green-400 text-xs hover:bg-green-950 rounded transition-colors font-mono"
-              >
-                &gt; [NEXT →]
               </button>
             </div>
           </div>
